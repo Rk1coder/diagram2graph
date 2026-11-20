@@ -6,41 +6,8 @@ from PIL import Image, ImageDraw, ImageFont
 
 from diagram2graph.graph import validate_graph
 
-WIDTH, HEIGHT = 260, 128
+WIDTH, HEIGHT = 220, 88
 COLORS = {"process": "#edf4ff", "decision": "#fff4dc", "terminator": "#eaf7f0"}
-
-
-def _layout(graph):
-    order = {node["id"]: index for index, node in enumerate(graph["nodes"])}
-    network = nx.DiGraph()
-    network.add_nodes_from(order)
-    network.add_edges_from((e["source"], e["target"]) for e in graph["edges"])
-    components = [
-        sorted(group, key=order.get) for group in nx.strongly_connected_components(network)
-    ]
-    condensed = nx.condensation(network, components)
-    levels = {}
-    for component in nx.topological_sort(condensed):
-        levels[component] = max(
-            (levels[p] + len(components[p]) for p in condensed.predecessors(component)), default=0
-        )
-    rows = {}
-    for component, members in enumerate(components):
-        for offset, identity in enumerate(members):
-            rows.setdefault(levels[component] + offset, []).append(identity)
-    columns = max(map(len, rows.values()))
-    canvas_width = columns * (WIDTH + 64) + 150
-    canvas_height = (max(rows) + 1) * (HEIGHT + 80) + 80
-    positions = {}
-    for rank, identities in rows.items():
-        identities.sort(key=order.get)
-        start = (canvas_width - 100 - len(identities) * (WIDTH + 64)) / 2 + 32
-        for index, identity in enumerate(identities):
-            positions[identity] = (
-                start + index * (WIDTH + 64) + WIDTH / 2,
-                50 + rank * (HEIGHT + 80) + HEIGHT / 2,
-            )
-    return positions, int(canvas_width), int(canvas_height)
 
 
 def _wrapped(label, font, limit):
@@ -56,11 +23,45 @@ def _wrapped(label, font, limit):
     return lines
 
 
+def _layout(graph):
+    order = {node["id"]: index for index, node in enumerate(graph["nodes"])}
+    network = nx.DiGraph()
+    network.add_nodes_from(order)
+    network.add_edges_from((e["source"], e["target"]) for e in graph["edges"])
+    groups = [sorted(group, key=order.get) for group in nx.strongly_connected_components(network)]
+    condensed = nx.condensation(network, groups)
+    levels = {}
+    for component in nx.topological_sort(condensed):
+        levels[component] = max(
+            (levels[p] + len(groups[p]) for p in condensed.predecessors(component)), default=0
+        )
+    rows = {}
+    for component, members in enumerate(groups):
+        for offset, identity in enumerate(members):
+            rows.setdefault(levels[component] + offset, []).append(identity)
+    label_font = ImageFont.load_default(size=13)
+    gap = max([40] + [len(_wrapped(e["label"], label_font, 96)) * 16 + 16 for e in graph["edges"]])
+    columns = max(map(len, rows.values()))
+    canvas_width = columns * WIDTH + (columns - 1) * 64 + 360
+    canvas_height = (max(rows) + 1) * (HEIGHT + gap) + 64
+    positions = {}
+    for rank, identities in rows.items():
+        identities.sort(key=order.get)
+        row_width = len(identities) * WIDTH + (len(identities) - 1) * 64
+        start = (canvas_width - row_width) / 2
+        for index, identity in enumerate(identities):
+            positions[identity] = (
+                start + index * (WIDTH + 64) + WIDTH / 2,
+                32 + rank * (HEIGHT + gap) + HEIGHT / 2,
+            )
+    return positions, int(canvas_width), int(canvas_height), gap
+
+
 def _label(node):
     for size in range(18, 9, -1):
         font = ImageFont.load_default(size=size)
         lines = _wrapped(
-            node["label"], font, WIDTH * (0.58 if node["kind"] == "decision" else 0.82)
+            node["label"], font, WIDTH * (0.45 if node["kind"] == "decision" else 0.82)
         )
         spacing = size * 1.3
         fits = len(lines) * spacing <= HEIGHT - 24
@@ -75,53 +76,67 @@ def _label(node):
     return font, lines, size, spacing
 
 
-def _edge_curve(edge, positions, index):
+def _route(edge, positions, index, gap):
     sx, sy = positions[edge["source"]]
     tx, ty = positions[edge["target"]]
     if ty > sy:
         start, end = (sx, sy + HEIGHT / 2), (tx, ty - HEIGHT / 2)
-        mid = (start[1] + end[1]) / 2
-        points = (start, (sx, mid), (tx, mid), end)
-    else:
-        lane = max(sx, tx) + WIDTH / 2 + 35 + (index % 3) * 18
-        start, end = (sx + WIDTH / 2, sy), (tx + WIDTH / 2, ty)
-        if sy == ty:
-            lane = max(sx, tx) + WIDTH / 2 + 45
-            points = (start, (lane, sy - 90), (lane, ty + 90), end)
+        if ty - sy > HEIGHT + gap + 1:
+            # Route shortcuts around every intermediate rank, rather than through its nodes.
+            lane = min(x for x, _ in positions.values()) - WIDTH / 2 - 35 - (index % 3) * 12
+            points = [
+                start,
+                (sx, start[1] + gap / 2),
+                (lane, start[1] + gap / 2),
+                (lane, end[1] - gap / 2),
+                (tx, end[1] - gap / 2),
+                end,
+            ]
+            label_position = (lane, (start[1] + end[1]) / 2, "left")
         else:
-            points = (start, (lane, sy), (lane, ty), end)
-    return points
+            mid = (start[1] + end[1]) / 2
+            points = [start, (sx, mid), (tx, mid), end]
+            label_position = ((sx + tx) / 2 + 8, mid, "right")
+    else:
+        lane = max(x for x, _ in positions.values()) + WIDTH / 2 + 35 + (index % 3) * 12
+        start, end = (sx + WIDTH / 2, sy), (tx + WIDTH / 2, ty)
+        if edge["source"] == edge["target"]:
+            top = sy - HEIGHT / 2 - gap / 2
+            points = [start, (lane, sy), (lane, top), (tx, top), (tx, ty - HEIGHT / 2)]
+            label_position = (lane, top, "right")
+        else:
+            points = [start, (lane, sy), (lane, ty), end]
+            label_position = (lane, (sy + ty) / 2, "right")
+    return points, label_position
 
 
-def _bezier(points, t):
-    p0, p1, p2, p3 = points
-    return tuple(
-        (1 - t) ** 3 * p0[i]
-        + 3 * (1 - t) ** 2 * t * p1[i]
-        + 3 * (1 - t) * t * t * p2[i]
-        + t**3 * p3[i]
-        for i in (0, 1)
-    )
+def _edge_text(edge, position):
+    font = ImageFont.load_default(size=13)
+    lines = _wrapped(edge["label"], font, 96)
+    x, y, side = position
+    longest = max((font.getlength(line) for line in lines), default=0)
+    left = x - longest - 12 if side == "left" else x + 8
+    return font, lines, left, y - (len(lines) - 1) * 8
 
 
 def render_svg(graph):
     graph = validate_graph(graph)
-    positions, width, height = _layout(graph)
+    positions, width, height, gap = _layout(graph)
     parts = [
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}" role="img" aria-label="Reconstructed flowchart">',
         '<rect width="100%" height="100%" fill="white"/>',
         '<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#61718a"/></marker></defs>',
     ]
     for index, edge in enumerate(graph["edges"]):
-        points = _edge_curve(edge, positions, index)
-        (sx, sy), (ax, ay), (bx, by), (tx, ty) = points
+        points, label_position = _route(edge, positions, index, gap)
+        path = "M " + " L ".join(f"{x} {y}" for x, y in points)
         parts.append(
-            f'<path data-edge="{index}" d="M {sx} {sy} C {ax} {ay}, {bx} {by}, {tx} {ty}" fill="none" stroke="#61718a" stroke-width="2" marker-end="url(#arrow)"/>'
+            f'<path data-edge="{index}" d="{path}" fill="none" stroke="#61718a" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>'
         )
-        if edge["label"]:
-            x, y = _bezier(points, 0.5)
+        _, lines, x, y = _edge_text(edge, label_position)
+        for line_index, line in enumerate(lines):
             parts.append(
-                f'<text x="{x + 10}" y="{y - 8}" fill="#44536a" font-family="Arial,sans-serif" font-size="14">{html.escape(edge["label"])}</text>'
+                f'<text x="{x}" y="{y + line_index * 16}" fill="#44536a" font-family="Arial,sans-serif" font-size="13">{html.escape(line)}</text>'
             )
     for node in graph["nodes"]:
         x, y = positions[node["id"]]
@@ -148,15 +163,14 @@ def render_svg(graph):
 
 def render_png(graph):
     graph = validate_graph(graph)
-    positions, width, height = _layout(graph)
+    positions, width, height, gap = _layout(graph)
     image = Image.new("RGB", (width, height), "white")
     draw = ImageDraw.Draw(image)
     for index, edge in enumerate(graph["edges"]):
-        points = _edge_curve(edge, positions, index)
-        samples = [_bezier(points, i / 40) for i in range(41)]
-        draw.line(samples, fill="#61718a", width=2)
-        tip = samples[-1]
-        before = samples[-2]
+        points, label_position = _route(edge, positions, index, gap)
+        draw.line(points, fill="#61718a", width=2)
+        tip = points[-1]
+        before = next(p for p in reversed(points[:-1]) if p != tip)
         angle = math.atan2(tip[1] - before[1], tip[0] - before[0])
         draw.polygon(
             [
@@ -166,15 +180,9 @@ def render_png(graph):
             ],
             fill="#61718a",
         )
-        if edge["label"]:
-            x, y = _bezier(points, 0.5)
-            draw.text(
-                (x + 10, y - 10),
-                edge["label"],
-                font=ImageFont.load_default(size=14),
-                fill="#44536a",
-                anchor="ls",
-            )
+        font, lines, x, y = _edge_text(edge, label_position)
+        for index, line in enumerate(lines):
+            draw.text((x, y + index * 16), line, font=font, fill="#44536a", anchor="ls")
     for node in graph["nodes"]:
         x, y = positions[node["id"]]
         box = (x - WIDTH / 2, y - HEIGHT / 2, x + WIDTH / 2, y + HEIGHT / 2)

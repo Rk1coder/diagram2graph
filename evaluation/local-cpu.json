@@ -1,0 +1,695 @@
+{
+  "scope": "Three original development fixtures; not an independent benchmark.",
+  "prompt": "Read the printed flowchart in this image. Return only one complete JSON object with exactly two keys: nodes and edges.\nnodes is an array of objects with exactly: id, label, kind. Assign short unique IDs n1, n2, etc. Copy the text inside each visible node. kind must be process (rectangle), decision (diamond), or terminator (oval/start/end).\nedges is an array of objects with exactly: source, target, label. source and target reference node IDs. Follow the visible arrow direction carefully, including loops and branches. Copy arrow labels such as Yes or No; use an empty string for an unlabeled arrow.\nIgnore the title and text outside nodes/arrows. Do not invent missing nodes, edges or labels. Maximum 12 nodes and 20 edges. No explanation or extra fields.",
+  "results": [
+    {
+      "id": "linear",
+      "image": "linear.png",
+      "expected": {
+        "nodes": [
+          {
+            "id": "a",
+            "label": "Start",
+            "kind": "terminator"
+          },
+          {
+            "id": "b",
+            "label": "Read file",
+            "kind": "process"
+          },
+          {
+            "id": "c",
+            "label": "Validate",
+            "kind": "process"
+          },
+          {
+            "id": "d",
+            "label": "Save",
+            "kind": "process"
+          },
+          {
+            "id": "e",
+            "label": "Finish",
+            "kind": "terminator"
+          }
+        ],
+        "edges": [
+          {
+            "source": "a",
+            "target": "b",
+            "label": ""
+          },
+          {
+            "source": "b",
+            "target": "c",
+            "label": ""
+          },
+          {
+            "source": "c",
+            "target": "d",
+            "label": ""
+          },
+          {
+            "source": "d",
+            "target": "e",
+            "label": ""
+          }
+        ]
+      },
+      "source_sha256": "6ee61561447e345f03da65cb00b7cc1a7d99084c94a1720d334bf7d9e43d5040",
+      "report": {
+        "schema_version": 1,
+        "origin": "model",
+        "parent_report_id": null,
+        "model": {
+          "id": "Qwen/Qwen3-VL-2B-Instruct",
+          "revision": "89644892e4d85e24eaac8bacfd4f463576704203"
+        },
+        "prompt_sha256": "7ff96550acfbf106a58ea9970c064b0f2f1a819c5e8de69043c9213ac7443946",
+        "settings": {
+          "device": "cpu",
+          "dtype": "float32",
+          "min_pixels": 65536,
+          "max_pixels": 262144,
+          "max_new_tokens": 768,
+          "image_processor": "fast",
+          "threads": 4
+        },
+        "input_file_sha256": "6ee61561447e345f03da65cb00b7cc1a7d99084c94a1720d334bf7d9e43d5040",
+        "normalized_image_sha256": "6ee61561447e345f03da65cb00b7cc1a7d99084c94a1720d334bf7d9e43d5040",
+        "input_size": [
+          800,
+          780
+        ],
+        "raw_prediction": "```json\n{\n  \"nodes\": [\n    {\n      \"id\": \"n1\",\n      \"label\": \"Start\",\n      \"kind\": \"terminator\"\n    },\n    {\n      \"id\": \"n2\",\n      \"label\": \"Read file\",\n      \"kind\": \"process\"\n    },\n    {\n      \"id\": \"n3\",\n      \"label\": \"Validate\",\n      \"kind\": \"process\"\n    },\n    {\n      \"id\": \"n4\",\n      \"label\": \"Save\",\n      \"kind\": \"process\"\n    },\n    {\n      \"id\": \"n5\",\n      \"label\": \"Finish\",\n      \"kind\": \"terminator\"\n    }\n  ],\n  \"edges\": [\n    {\n      \"source\": \"n1\",\n      \"target\": \"n2\",\n      \"label\": \"\"\n    },\n    {\n      \"source\": \"n2\",\n      \"target\": \"n3\",\n      \"label\": \"\"\n    },\n    {\n      \"source\": \"n3\",\n      \"target\": \"n4\",\n      \"label\": \"\"\n    },\n    {\n      \"source\": \"n4\",\n      \"target\": \"n5\",\n      \"label\": \"\"\n    }\n  ]\n}\n```",
+        "model_graph": {
+          "nodes": [
+            {
+              "id": "n1",
+              "label": "Start",
+              "kind": "terminator"
+            },
+            {
+              "id": "n2",
+              "label": "Read file",
+              "kind": "process"
+            },
+            {
+              "id": "n3",
+              "label": "Validate",
+              "kind": "process"
+            },
+            {
+              "id": "n4",
+              "label": "Save",
+              "kind": "process"
+            },
+            {
+              "id": "n5",
+              "label": "Finish",
+              "kind": "terminator"
+            }
+          ],
+          "edges": [
+            {
+              "source": "n1",
+              "target": "n2",
+              "label": ""
+            },
+            {
+              "source": "n2",
+              "target": "n3",
+              "label": ""
+            },
+            {
+              "source": "n3",
+              "target": "n4",
+              "label": ""
+            },
+            {
+              "source": "n4",
+              "target": "n5",
+              "label": ""
+            }
+          ]
+        },
+        "inference_seconds": 95.652,
+        "notice": "Model extraction; inspect every label and arrow.",
+        "id": "r-989ca8533f8d4dd9bab894f26e65c77c",
+        "graph": {
+          "nodes": [
+            {
+              "id": "n1",
+              "label": "Start",
+              "kind": "terminator"
+            },
+            {
+              "id": "n2",
+              "label": "Read file",
+              "kind": "process"
+            },
+            {
+              "id": "n3",
+              "label": "Validate",
+              "kind": "process"
+            },
+            {
+              "id": "n4",
+              "label": "Save",
+              "kind": "process"
+            },
+            {
+              "id": "n5",
+              "label": "Finish",
+              "kind": "terminator"
+            }
+          ],
+          "edges": [
+            {
+              "source": "n1",
+              "target": "n2",
+              "label": ""
+            },
+            {
+              "source": "n2",
+              "target": "n3",
+              "label": ""
+            },
+            {
+              "source": "n3",
+              "target": "n4",
+              "label": ""
+            },
+            {
+              "source": "n4",
+              "target": "n5",
+              "label": ""
+            }
+          ]
+        },
+        "exported_at": "2026-11-20T13:32:22.521281+00:00"
+      },
+      "score": {
+        "nodes": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "true_positive": 5,
+          "expected": 5,
+          "predicted": 5
+        },
+        "edges": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "true_positive": 4,
+          "expected": 4,
+          "predicted": 4
+        },
+        "shape_accuracy": 1.0,
+        "exact_graph": true,
+        "label_identity_ambiguous": false
+      }
+    },
+    {
+      "id": "branch",
+      "image": "branch.png",
+      "expected": {
+        "nodes": [
+          {
+            "id": "a",
+            "label": "Request",
+            "kind": "terminator"
+          },
+          {
+            "id": "b",
+            "label": "Approved?",
+            "kind": "decision"
+          },
+          {
+            "id": "c",
+            "label": "Publish",
+            "kind": "process"
+          },
+          {
+            "id": "d",
+            "label": "Revise",
+            "kind": "process"
+          },
+          {
+            "id": "e",
+            "label": "Done",
+            "kind": "terminator"
+          }
+        ],
+        "edges": [
+          {
+            "source": "a",
+            "target": "b",
+            "label": ""
+          },
+          {
+            "source": "b",
+            "target": "c",
+            "label": "Yes"
+          },
+          {
+            "source": "b",
+            "target": "d",
+            "label": "No"
+          },
+          {
+            "source": "c",
+            "target": "e",
+            "label": ""
+          },
+          {
+            "source": "d",
+            "target": "e",
+            "label": ""
+          }
+        ]
+      },
+      "source_sha256": "4c9d437fd1807044d9a7b566311a241dd14e448c80756a7b7a9df0ccb10ca8af",
+      "report": {
+        "schema_version": 1,
+        "origin": "model",
+        "parent_report_id": null,
+        "model": {
+          "id": "Qwen/Qwen3-VL-2B-Instruct",
+          "revision": "89644892e4d85e24eaac8bacfd4f463576704203"
+        },
+        "prompt_sha256": "7ff96550acfbf106a58ea9970c064b0f2f1a819c5e8de69043c9213ac7443946",
+        "settings": {
+          "device": "cpu",
+          "dtype": "float32",
+          "min_pixels": 65536,
+          "max_pixels": 262144,
+          "max_new_tokens": 768,
+          "image_processor": "fast",
+          "threads": 4
+        },
+        "input_file_sha256": "4c9d437fd1807044d9a7b566311a241dd14e448c80756a7b7a9df0ccb10ca8af",
+        "normalized_image_sha256": "4c9d437fd1807044d9a7b566311a241dd14e448c80756a7b7a9df0ccb10ca8af",
+        "input_size": [
+          840,
+          800
+        ],
+        "raw_prediction": "```json\n{\n  \"nodes\": [\n    {\n      \"id\": \"n1\",\n      \"label\": \"Request\",\n      \"kind\": \"terminator\"\n    },\n    {\n      \"id\": \"n2\",\n      \"label\": \"Approved?\",\n      \"kind\": \"decision\"\n    },\n    {\n      \"id\": \"n3\",\n      \"label\": \"Publish\",\n      \"kind\": \"process\"\n    },\n    {\n      \"id\": \"n4\",\n      \"label\": \"Revise\",\n      \"kind\": \"process\"\n    },\n    {\n      \"id\": \"n5\",\n      \"label\": \"Done\",\n      \"kind\": \"terminator\"\n    }\n  ],\n  \"edges\": [\n    {\n      \"source\": \"n1\",\n      \"target\": \"n2\",\n      \"label\": \"\"\n    },\n    {\n      \"source\": \"n2\",\n      \"target\": \"n3\",\n      \"label\": \"Yes\"\n    },\n    {\n      \"source\": \"n2\",\n      \"target\": \"n4\",\n      \"label\": \"No\"\n    },\n    {\n      \"source\": \"n3\",\n      \"target\": \"n5\",\n      \"label\": \"\"\n    },\n    {\n      \"source\": \"n4\",\n      \"target\": \"n5\",\n      \"label\": \"\"\n    }\n  ]\n}\n```",
+        "model_graph": {
+          "nodes": [
+            {
+              "id": "n1",
+              "label": "Request",
+              "kind": "terminator"
+            },
+            {
+              "id": "n2",
+              "label": "Approved?",
+              "kind": "decision"
+            },
+            {
+              "id": "n3",
+              "label": "Publish",
+              "kind": "process"
+            },
+            {
+              "id": "n4",
+              "label": "Revise",
+              "kind": "process"
+            },
+            {
+              "id": "n5",
+              "label": "Done",
+              "kind": "terminator"
+            }
+          ],
+          "edges": [
+            {
+              "source": "n1",
+              "target": "n2",
+              "label": ""
+            },
+            {
+              "source": "n2",
+              "target": "n3",
+              "label": "Yes"
+            },
+            {
+              "source": "n2",
+              "target": "n4",
+              "label": "No"
+            },
+            {
+              "source": "n3",
+              "target": "n5",
+              "label": ""
+            },
+            {
+              "source": "n4",
+              "target": "n5",
+              "label": ""
+            }
+          ]
+        },
+        "inference_seconds": 91.762,
+        "notice": "Model extraction; inspect every label and arrow.",
+        "id": "r-1caed2b350294080b97e38976cc72404",
+        "graph": {
+          "nodes": [
+            {
+              "id": "n1",
+              "label": "Request",
+              "kind": "terminator"
+            },
+            {
+              "id": "n2",
+              "label": "Approved?",
+              "kind": "decision"
+            },
+            {
+              "id": "n3",
+              "label": "Publish",
+              "kind": "process"
+            },
+            {
+              "id": "n4",
+              "label": "Revise",
+              "kind": "process"
+            },
+            {
+              "id": "n5",
+              "label": "Done",
+              "kind": "terminator"
+            }
+          ],
+          "edges": [
+            {
+              "source": "n1",
+              "target": "n2",
+              "label": ""
+            },
+            {
+              "source": "n2",
+              "target": "n3",
+              "label": "Yes"
+            },
+            {
+              "source": "n2",
+              "target": "n4",
+              "label": "No"
+            },
+            {
+              "source": "n3",
+              "target": "n5",
+              "label": ""
+            },
+            {
+              "source": "n4",
+              "target": "n5",
+              "label": ""
+            }
+          ]
+        },
+        "exported_at": "2026-11-20T13:33:54.328535+00:00"
+      },
+      "score": {
+        "nodes": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "true_positive": 5,
+          "expected": 5,
+          "predicted": 5
+        },
+        "edges": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "true_positive": 5,
+          "expected": 5,
+          "predicted": 5
+        },
+        "shape_accuracy": 1.0,
+        "exact_graph": true,
+        "label_identity_ambiguous": false
+      }
+    },
+    {
+      "id": "loop",
+      "image": "loop.png",
+      "expected": {
+        "nodes": [
+          {
+            "id": "a",
+            "label": "Start",
+            "kind": "terminator"
+          },
+          {
+            "id": "b",
+            "label": "Run tests",
+            "kind": "process"
+          },
+          {
+            "id": "c",
+            "label": "Passed?",
+            "kind": "decision"
+          },
+          {
+            "id": "d",
+            "label": "Release",
+            "kind": "process"
+          },
+          {
+            "id": "e",
+            "label": "Fix issues",
+            "kind": "process"
+          },
+          {
+            "id": "f",
+            "label": "Done",
+            "kind": "terminator"
+          }
+        ],
+        "edges": [
+          {
+            "source": "a",
+            "target": "b",
+            "label": ""
+          },
+          {
+            "source": "b",
+            "target": "c",
+            "label": ""
+          },
+          {
+            "source": "c",
+            "target": "d",
+            "label": "Yes"
+          },
+          {
+            "source": "c",
+            "target": "e",
+            "label": "No"
+          },
+          {
+            "source": "e",
+            "target": "b",
+            "label": "Retry"
+          },
+          {
+            "source": "d",
+            "target": "f",
+            "label": ""
+          }
+        ]
+      },
+      "source_sha256": "af6eaf47f42d9e3af84ed954241abf7c799c0598e59611b31af30c0447fa9fdd",
+      "report": {
+        "schema_version": 1,
+        "origin": "model",
+        "parent_report_id": null,
+        "model": {
+          "id": "Qwen/Qwen3-VL-2B-Instruct",
+          "revision": "89644892e4d85e24eaac8bacfd4f463576704203"
+        },
+        "prompt_sha256": "7ff96550acfbf106a58ea9970c064b0f2f1a819c5e8de69043c9213ac7443946",
+        "settings": {
+          "device": "cpu",
+          "dtype": "float32",
+          "min_pixels": 65536,
+          "max_pixels": 262144,
+          "max_new_tokens": 768,
+          "image_processor": "fast",
+          "threads": 4
+        },
+        "input_file_sha256": "af6eaf47f42d9e3af84ed954241abf7c799c0598e59611b31af30c0447fa9fdd",
+        "normalized_image_sha256": "af6eaf47f42d9e3af84ed954241abf7c799c0598e59611b31af30c0447fa9fdd",
+        "input_size": [
+          860,
+          920
+        ],
+        "raw_prediction": "```json\n{\n  \"nodes\": [\n    {\n      \"id\": \"n1\",\n      \"label\": \"Start\",\n      \"kind\": \"terminator\"\n    },\n    {\n      \"id\": \"n2\",\n      \"label\": \"Run tests\",\n      \"kind\": \"process\"\n    },\n    {\n      \"id\": \"n3\",\n      \"label\": \"Passed?\",\n      \"kind\": \"decision\"\n    },\n    {\n      \"id\": \"n4\",\n      \"label\": \"Fix issues\",\n      \"kind\": \"process\"\n    },\n    {\n      \"id\": \"n5\",\n      \"label\": \"Release\",\n      \"kind\": \"process\"\n    },\n    {\n      \"id\": \"n6\",\n      \"label\": \"Done\",\n      \"kind\": \"terminator\"\n    }\n  ],\n  \"edges\": [\n    {\n      \"source\": \"n1\",\n      \"target\": \"n2\",\n      \"label\": \"\"\n    },\n    {\n      \"source\": \"n2\",\n      \"target\": \"n3\",\n      \"label\": \"\"\n    },\n    {\n      \"source\": \"n3\",\n      \"target\": \"n5\",\n      \"label\": \"Yes\"\n    },\n    {\n      \"source\": \"n3\",\n      \"target\": \"n4\",\n      \"label\": \"No\"\n    },\n    {\n      \"source\": \"n4\",\n      \"target\": \"n2\",\n      \"label\": \"Retry\"\n    },\n    {\n      \"source\": \"n5\",\n      \"target\": \"n6\",\n      \"label\": \"\"\n    }\n  ]\n}\n```",
+        "model_graph": {
+          "nodes": [
+            {
+              "id": "n1",
+              "label": "Start",
+              "kind": "terminator"
+            },
+            {
+              "id": "n2",
+              "label": "Run tests",
+              "kind": "process"
+            },
+            {
+              "id": "n3",
+              "label": "Passed?",
+              "kind": "decision"
+            },
+            {
+              "id": "n4",
+              "label": "Fix issues",
+              "kind": "process"
+            },
+            {
+              "id": "n5",
+              "label": "Release",
+              "kind": "process"
+            },
+            {
+              "id": "n6",
+              "label": "Done",
+              "kind": "terminator"
+            }
+          ],
+          "edges": [
+            {
+              "source": "n1",
+              "target": "n2",
+              "label": ""
+            },
+            {
+              "source": "n2",
+              "target": "n3",
+              "label": ""
+            },
+            {
+              "source": "n3",
+              "target": "n5",
+              "label": "Yes"
+            },
+            {
+              "source": "n3",
+              "target": "n4",
+              "label": "No"
+            },
+            {
+              "source": "n4",
+              "target": "n2",
+              "label": "Retry"
+            },
+            {
+              "source": "n5",
+              "target": "n6",
+              "label": ""
+            }
+          ]
+        },
+        "inference_seconds": 101.129,
+        "notice": "Model extraction; inspect every label and arrow.",
+        "id": "r-c0a1a6742d1e459e9f85f4a16b8ae394",
+        "graph": {
+          "nodes": [
+            {
+              "id": "n1",
+              "label": "Start",
+              "kind": "terminator"
+            },
+            {
+              "id": "n2",
+              "label": "Run tests",
+              "kind": "process"
+            },
+            {
+              "id": "n3",
+              "label": "Passed?",
+              "kind": "decision"
+            },
+            {
+              "id": "n4",
+              "label": "Fix issues",
+              "kind": "process"
+            },
+            {
+              "id": "n5",
+              "label": "Release",
+              "kind": "process"
+            },
+            {
+              "id": "n6",
+              "label": "Done",
+              "kind": "terminator"
+            }
+          ],
+          "edges": [
+            {
+              "source": "n1",
+              "target": "n2",
+              "label": ""
+            },
+            {
+              "source": "n2",
+              "target": "n3",
+              "label": ""
+            },
+            {
+              "source": "n3",
+              "target": "n5",
+              "label": "Yes"
+            },
+            {
+              "source": "n3",
+              "target": "n4",
+              "label": "No"
+            },
+            {
+              "source": "n4",
+              "target": "n2",
+              "label": "Retry"
+            },
+            {
+              "source": "n5",
+              "target": "n6",
+              "label": ""
+            }
+          ]
+        },
+        "exported_at": "2026-11-20T13:35:35.505587+00:00"
+      },
+      "score": {
+        "nodes": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "true_positive": 6,
+          "expected": 6,
+          "predicted": 6
+        },
+        "edges": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "true_positive": 6,
+          "expected": 6,
+          "predicted": 6
+        },
+        "shape_accuracy": 1.0,
+        "exact_graph": true,
+        "label_identity_ambiguous": false
+      }
+    }
+  ],
+  "total": 3,
+  "errors": 0
+}

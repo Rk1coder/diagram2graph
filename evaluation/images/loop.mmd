@@ -1,0 +1,13 @@
+flowchart TD
+    node_n1(["Start"])
+    node_n2["Run tests"]
+    node_n3{"Passed?"}
+    node_n4["Fix issues"]
+    node_n5["Release"]
+    node_n6(["Done"])
+    node_n1 --> node_n2
+    node_n2 --> node_n3
+    node_n3 -->|"Yes"| node_n5
+    node_n3 -->|"No"| node_n4
+    node_n4 -->|"Retry"| node_n2
+    node_n5 --> node_n6
