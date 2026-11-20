@@ -55,3 +55,51 @@ def test_input_change_clears_results_and_prevents_obsolete_completion(tmp_path):
     service = Service(ChangingEngine(), tmp_path / "reports")
     result = extract_diagram(str(path), session, service=service)
     assert all(isinstance(v, dict) and v.get("__type__") == "update" for v in result)
+
+
+def test_queued_edit_from_prior_browser_revision_cannot_undo_newer_graph(tmp_path):
+    path = tmp_path / "input.png"
+    Image.new("RGB", (40, 40)).save(path)
+    service = Service(Engine(), tmp_path / "reports")
+    original = service.extract(path)
+    state = {"token": "original", "input": str(path), "report_id": original["report"]["id"]}
+    first = rename_node(original["report"]["id"], "b", "Newest label", state, service=service)
+    stale = apply_graph("{broken old JSON", original["report"]["id"], state, service=service)
+    assert all(isinstance(v, dict) and v.get("__type__") == "update" for v in stale)
+    assert service.get_report(first[5])["graph"]["nodes"][1]["label"] == "Newest label"
+
+
+def test_edit_api_requires_the_revision_visible_at_click_time():
+    from app import build_app
+
+    demo = build_app()
+    api = demo.get_api_info()
+    parameters = api["named_endpoints"]["/edit"]["parameters"]
+    assert any(p["parameter_name"] == "report_id" for p in parameters)
+
+
+def test_background_edit_error_cannot_clear_a_newer_result(tmp_path):
+    path = tmp_path / "input.png"
+    Image.new("RGB", (40, 40)).save(path)
+    service = Service(Engine(), tmp_path / "reports")
+    original = service.extract(path)
+    for operation in ("apply", "rename"):
+        state = {"token": "original", "report_id": original["report"]["id"]}
+
+        class InterruptedService:
+            def get_report(self, report_id):
+                return service.get_report(report_id)
+
+            def edit(self, report_id, graph):
+                state.update(token="newer", report_id="newer-report")
+                raise RuntimeError("Interrupted backend")
+
+        if operation == "apply":
+            result = apply_graph(
+                json.dumps(GRAPH), original["report"]["id"], state, service=InterruptedService()
+            )
+        else:
+            result = rename_node(
+                original["report"]["id"], "b", "New label", state, service=InterruptedService()
+            )
+        assert all(isinstance(v, dict) and v.get("__type__") == "update" for v in result)

@@ -58,7 +58,7 @@ def test_invalid_model_output_is_not_exported_and_remains_diagnosable(tmp_path):
     with pytest.raises(ValueError) as error:
         service.extract(image)
     assert error.value.raw_prediction == '{"nodes":[],"edges":[]}'
-    assert list((tmp_path / "reports").iterdir()) == []
+    assert list(service.root.glob("r-*")) == []
 
 
 def test_report_ids_cannot_escape_cache_and_reports_expire(tmp_path):

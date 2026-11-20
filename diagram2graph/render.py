@@ -1,5 +1,6 @@
 import html
 import math
+from collections import Counter
 
 import networkx as nx
 from PIL import Image, ImageDraw, ImageFont
@@ -39,22 +40,65 @@ def _layout(graph):
     for component, members in enumerate(groups):
         for offset, identity in enumerate(members):
             rows.setdefault(levels[component] + offset, []).append(identity)
-    label_font = ImageFont.load_default(size=13)
-    gap = max([40] + [len(_wrapped(e["label"], label_font, 96)) * 16 + 16 for e in graph["edges"]])
+    ranks = {identity: rank for rank, identities in rows.items() for identity in identities}
+    counts = Counter((e["source"], e["target"]) for e in graph["edges"])
+    occurrences = Counter()
+    slots = Counter()
+    route_meta = {}
+    for index, edge in enumerate(graph["edges"]):
+        pair = (edge["source"], edge["target"])
+        occurrence = occurrences[pair]
+        occurrences[pair] += 1
+        if counts[pair] > 1:
+            side = "left" if occurrence % 2 == 0 else "right"
+        elif ranks[edge["target"]] <= ranks[edge["source"]]:
+            side = "right"
+        elif ranks[edge["target"]] - ranks[edge["source"]] > 1:
+            side = "left"
+        else:
+            side = None
+        if side:
+            route_meta[index] = (side, slots[side])
+            slots[side] += 1
+    font = ImageFont.load_default(size=13)
+    gap = max([40] + [len(_wrapped(e["label"], font, 96)) * 16 + 16 for e in graph["edges"]])
     columns = max(map(len, rows.values()))
-    canvas_width = columns * WIDTH + (columns - 1) * 64 + 360
-    canvas_height = (max(rows) + 1) * (HEIGHT + gap) + 64
+    body_width = columns * WIDTH + (columns - 1) * 64
+    left_margin = 180 + max(0, slots["left"] - 1) * 128
+    right_margin = 180 + max(0, slots["right"] - 1) * 128
+    width = body_width + left_margin + right_margin
+    height = (max(rows) + 1) * (HEIGHT + gap) + 64
     positions = {}
     for rank, identities in rows.items():
         identities.sort(key=order.get)
         row_width = len(identities) * WIDTH + (len(identities) - 1) * 64
-        start = (canvas_width - row_width) / 2
+        start = left_margin + (body_width - row_width) / 2
         for index, identity in enumerate(identities):
             positions[identity] = (
                 start + index * (WIDTH + 64) + WIDTH / 2,
                 32 + rank * (HEIGHT + gap) + HEIGHT / 2,
             )
-    return positions, int(canvas_width), int(canvas_height), gap
+    min_x, min_y, max_x, max_y = 12, 12, width - 12, height - 12
+    for index, edge in enumerate(graph["edges"]):
+        points, label_position = _route(edge, positions, index, gap, route_meta)
+        font, lines, x, y = _edge_text(edge, label_position)
+        min_x = min(min_x, *(p[0] for p in points))
+        min_y = min(min_y, *(p[1] for p in points))
+        max_x = max(max_x, *(p[0] for p in points))
+        max_y = max(max_y, *(p[1] for p in points))
+        if lines:
+            min_x, min_y = min(min_x, x), min(min_y, y - 13)
+            max_x = max(max_x, x + max(font.getlength(line) for line in lines))
+            max_y = max(max_y, y + (len(lines) - 1) * 16 + 4)
+    dx, dy = max(0, 12 - min_x), max(0, 12 - min_y)
+    positions = {identity: (x + dx, y + dy) for identity, (x, y) in positions.items()}
+    return (
+        positions,
+        math.ceil(max(width, max_x + 12) + dx),
+        math.ceil(max(height, max_y + 12) + dy),
+        gap,
+        route_meta,
+    )
 
 
 def _label(node):
@@ -76,37 +120,39 @@ def _label(node):
     return font, lines, size, spacing
 
 
-def _route(edge, positions, index, gap):
+def _route(edge, positions, index, gap, route_meta):
     sx, sy = positions[edge["source"]]
     tx, ty = positions[edge["target"]]
+    route = route_meta.get(index)
+    if not route:
+        start, end = (sx, sy + HEIGHT / 2), (tx, ty - HEIGHT / 2)
+        mid = (start[1] + end[1]) / 2
+        return [start, (sx, mid), (tx, mid), end], ((sx + tx) / 2 + 8, mid, "right")
+    side, slot = route
+    if side == "left":
+        lane = min(x for x, _ in positions.values()) - WIDTH / 2 - 35 - slot * 128
+        port = -WIDTH / 2
+    else:
+        lane = max(x for x, _ in positions.values()) + WIDTH / 2 + 35 + slot * 128
+        port = WIDTH / 2
     if ty > sy:
         start, end = (sx, sy + HEIGHT / 2), (tx, ty - HEIGHT / 2)
-        if ty - sy > HEIGHT + gap + 1:
-            # Route shortcuts around every intermediate rank, rather than through its nodes.
-            lane = min(x for x, _ in positions.values()) - WIDTH / 2 - 35 - (index % 3) * 12
-            points = [
-                start,
-                (sx, start[1] + gap / 2),
-                (lane, start[1] + gap / 2),
-                (lane, end[1] - gap / 2),
-                (tx, end[1] - gap / 2),
-                end,
-            ]
-            label_position = (lane, (start[1] + end[1]) / 2, "left")
-        else:
-            mid = (start[1] + end[1]) / 2
-            points = [start, (sx, mid), (tx, mid), end]
-            label_position = ((sx + tx) / 2 + 8, mid, "right")
+        points = [
+            start,
+            (sx, start[1] + gap / 4),
+            (lane, start[1] + gap / 4),
+            (lane, end[1] - gap / 4),
+            (tx, end[1] - gap / 4),
+            end,
+        ]
+        label_position = (lane, (start[1] + end[1]) / 2, side)
+    elif edge["source"] == edge["target"]:
+        top = sy - HEIGHT / 2 - gap / 2
+        points = [(sx + port, sy), (lane, sy), (lane, top), (tx, top), (tx, ty - HEIGHT / 2)]
+        label_position = (lane, top, side)
     else:
-        lane = max(x for x, _ in positions.values()) + WIDTH / 2 + 35 + (index % 3) * 12
-        start, end = (sx + WIDTH / 2, sy), (tx + WIDTH / 2, ty)
-        if edge["source"] == edge["target"]:
-            top = sy - HEIGHT / 2 - gap / 2
-            points = [start, (lane, sy), (lane, top), (tx, top), (tx, ty - HEIGHT / 2)]
-            label_position = (lane, top, "right")
-        else:
-            points = [start, (lane, sy), (lane, ty), end]
-            label_position = (lane, (sy + ty) / 2, "right")
+        points = [(sx + port, sy), (lane, sy), (lane, ty), (tx + port, ty)]
+        label_position = (lane, (sy + ty) / 2, side)
     return points, label_position
 
 
@@ -121,14 +167,14 @@ def _edge_text(edge, position):
 
 def render_svg(graph):
     graph = validate_graph(graph)
-    positions, width, height, gap = _layout(graph)
+    positions, width, height, gap, route_meta = _layout(graph)
     parts = [
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}" role="img" aria-label="Reconstructed flowchart">',
         '<rect width="100%" height="100%" fill="white"/>',
         '<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#61718a"/></marker></defs>',
     ]
     for index, edge in enumerate(graph["edges"]):
-        points, label_position = _route(edge, positions, index, gap)
+        points, label_position = _route(edge, positions, index, gap, route_meta)
         path = "M " + " L ".join(f"{x} {y}" for x, y in points)
         parts.append(
             f'<path data-edge="{index}" d="{path}" fill="none" stroke="#61718a" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>'
@@ -163,11 +209,11 @@ def render_svg(graph):
 
 def render_png(graph):
     graph = validate_graph(graph)
-    positions, width, height, gap = _layout(graph)
+    positions, width, height, gap, route_meta = _layout(graph)
     image = Image.new("RGB", (width, height), "white")
     draw = ImageDraw.Draw(image)
     for index, edge in enumerate(graph["edges"]):
-        points, label_position = _route(edge, positions, index, gap)
+        points, label_position = _route(edge, positions, index, gap, route_meta)
         draw.line(points, fill="#61718a", width=2)
         tip = points[-1]
         before = next(p for p in reversed(points[:-1]) if p != tip)

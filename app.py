@@ -120,17 +120,31 @@ def _edit(graph, report_id, session, service):
 
 
 def apply_graph(text, report_id, session=None, *, service=None):
+    ticket = session["token"] if session is not None else None
+    if session is not None and session.get("report_id") != report_id:
+        return (gr.skip(),) * 10
     try:
         return _edit(parse_graph(text), report_id, session, service or SERVICE)
     except ValueError as exc:
+        if session is not None and (
+            session["token"] != ticket or session.get("report_id") != report_id
+        ):
+            return (gr.skip(),) * 10
         return _empty(str(exc), preserve=True)
     except Exception:
         LOGGER.exception("Graph editing failed")
+        if session is not None and (
+            session["token"] != ticket or session.get("report_id") != report_id
+        ):
+            return (gr.skip(),) * 10
         return _empty("Could not apply these changes. Check the server log.", preserve=True)
 
 
 def rename_node(report_id, node_id, label, session=None, *, service=None):
     service = service or SERVICE
+    ticket = session["token"] if session is not None else None
+    if session is not None and session.get("report_id") != report_id:
+        return (gr.skip(),) * 10
     try:
         graph = service.get_report(report_id)["graph"]
         matches = [node for node in graph["nodes"] if node["id"] == node_id]
@@ -139,9 +153,17 @@ def rename_node(report_id, node_id, label, session=None, *, service=None):
         matches[0]["label"] = label
         return _edit(graph, report_id, session, service)
     except ValueError as exc:
+        if session is not None and (
+            session["token"] != ticket or session.get("report_id") != report_id
+        ):
+            return (gr.skip(),) * 10
         return _empty(str(exc), preserve=True)
     except Exception:
         LOGGER.exception("Node editing failed")
+        if session is not None and (
+            session["token"] != ticket or session.get("report_id") != report_id
+        ):
+            return (gr.skip(),) * 10
         return _empty("Could not rename this node. Check the server log.", preserve=True)
 
 
@@ -154,7 +176,9 @@ def build_app():
     gr.set_static_paths(paths=samples)
     with gr.Blocks(title="Diagram2Graph", delete_cache=(60, 3600)) as demo:
         session = gr.State({"token": "initial", "input": None, "report_id": None})
-        report_id = gr.State(None)
+        # An ordinary hidden input is snapshotted by the browser at click time;
+        # gr.State would resolve to the latest revision when a queued edit executes.
+        report_id = gr.Textbox(value="", visible=False, label="Revision")
         gr.Markdown(
             "# Diagram2Graph\nFrom a diagram image to editable structure.\n\nExtract printed flowcharts locally. Inspect the arrows, refine the labels, and export Mermaid, SVG or PNG.",
             elem_id="masthead",

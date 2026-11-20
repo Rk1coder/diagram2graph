@@ -74,3 +74,31 @@ def test_shortcut_arrow_does_not_pass_through_an_unrelated_node():
                 for i in range(101)
             )
     assert not any(x + 1 < px < x + w - 1 and y + 1 < py < y + h - 1 for px, py in samples)
+
+
+def test_parallel_labeled_arrows_have_distinct_paths_and_labels():
+    graph = {
+        "nodes": [{"id": n, "label": n, "kind": "process"} for n in ["a", "b"]],
+        "edges": [{"source": "a", "target": "b", "label": label} for label in ["Yes", "No"]],
+    }
+    root = ET.fromstring(render_svg(graph))
+    ns = {"s": "http://www.w3.org/2000/svg"}
+    paths = root.findall(".//s:path[@data-edge]", ns)
+    assert len({p.attrib["d"] for p in paths}) == 2
+    texts = [t for t in root.findall(".//s:text", ns) if t.text in ["Yes", "No"]]
+    assert len({(t.attrib["x"], t.attrib["y"]) for t in texts}) == 2
+
+
+def test_long_labeled_first_row_self_loop_fits_inside_canvas():
+    graph = {
+        "nodes": [{"id": "a", "label": "Loop", "kind": "process"}],
+        "edges": [{"source": "a", "target": "a", "label": "WWW W " * 6 + "WWW"}],
+    }
+    root = ET.fromstring(render_svg(graph))
+    ns = {"s": "http://www.w3.org/2000/svg"}
+    width, height = float(root.attrib["width"]), float(root.attrib["height"])
+    for path in root.findall(".//s:path[@data-edge]", ns):
+        nums = [float(v) for v in re.findall(r"-?\d+(?:\.\d+)?", path.attrib["d"])]
+        assert all(0 <= x <= width and 0 <= y <= height for x, y in zip(nums[::2], nums[1::2]))
+    for text in root.findall(".//s:text", ns):
+        assert float(text.attrib["y"]) - float(text.attrib["font-size"]) >= 0

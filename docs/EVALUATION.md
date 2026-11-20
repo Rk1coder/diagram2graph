@@ -32,7 +32,11 @@ npm ci --ignore-scripts
 npm run test:mermaid
 ```
 
-Model errors are retained and cause a nonzero run exit status. Deterministic tests use a fixture inference boundary; recorded runs use the actual pinned model. Export images may be re-rendered from recorded graph data after renderer changes without repeating inference. SVG/PNG layouts reconstruct topology and do not reproduce source coordinates.
+Model errors are retained and cause a nonzero run exit status. New evaluator runs
+record model revision, inference settings, prompt hash and total attempt duration
+even when inference fails. Total attempt time includes export/scoring work; successful
+reports separately retain the original inference duration. The published successful
+run preserves its original report data. Deterministic tests use a fixture inference boundary; recorded runs use the actual pinned model. Export images may be re-rendered from recorded graph data after renderer changes without repeating inference. SVG/PNG layouts reconstruct topology and do not reproduce source coordinates.
 
 ## User edits and GIF
 

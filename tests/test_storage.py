@@ -38,3 +38,18 @@ def test_private_cache_refuses_symlink_and_never_follows_nested_links(tmp_path):
     (root / "external").symlink_to(outside, target_is_directory=True)
     prune_cache(root, now=secret.stat().st_ctime + 4000)
     assert secret.read_text() == "untouched"
+
+
+def test_configured_parent_is_not_disposable_and_permissions_are_unchanged(tmp_path):
+    parent = tmp_path / "shared"
+    parent.mkdir(mode=0o755)
+    unrelated = parent / "important.txt"
+    unrelated.write_text("keep this file")
+    root = private_cache(parent)
+    owned = root / "old.png"
+    owned.write_bytes(b"expire me")
+    prune_cache(root, now=owned.stat().st_ctime + 4000)
+    assert unrelated.read_text() == "keep this file"
+    assert parent.stat().st_mode & 0o777 == 0o755
+    assert not owned.exists()
+    assert root != parent and private_cache(parent) == root

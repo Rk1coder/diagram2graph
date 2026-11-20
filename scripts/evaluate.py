@@ -5,6 +5,7 @@ import hashlib
 import json
 import shutil
 import sys
+import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -35,7 +36,11 @@ def main():
             "image": task["image"],
             "expected": task["expected"],
             "source_sha256": task["sha256"],
+            "model": {"id": service.engine.model_id, "revision": service.engine.revision},
+            "settings": service.engine.settings,
+            "prompt_sha256": service.engine.prompt_sha256,
         }
+        started = time.perf_counter()
         try:
             result = service.extract(path)
             row["report"] = result["report"]
@@ -46,6 +51,7 @@ def main():
             row["error"] = f"{type(exc).__name__}: {exc}"
             if hasattr(exc, "raw_prediction"):
                 row["raw_prediction"] = exc.raw_prediction
+        row["elapsed_seconds"] = round(time.perf_counter() - started, 3)
         rows.append(row)
         record = {
             "scope": "Three original development fixtures; not an independent benchmark.",

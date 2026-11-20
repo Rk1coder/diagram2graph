@@ -38,10 +38,13 @@ in-app label and advanced graph editing regenerate the local previews and files.
 - UI: upload, actual source preview, extract, inspect reconstructed graph, quick label
   edits and advanced JSON structure edits, downloads. Expose extraction errors plainly.
   Changing inputs clears stale outputs and invalidates outstanding completions.
+  Browser-snapshotted revision IDs reject queued edits from an older graph.
 - An edit creates a new export revision retaining original model extraction metadata;
   edited outputs are labeled user edits, never scored as raw model predictions.
 - Original reports and private Gradio cache expire after one hour including restart,
-  at most 24 managed reports; only immutable original public fixtures bypass expiration.
+  at most 24 managed reports. Cleanup stays inside a marked owned cache child,
+  preserving configured parent permissions and sibling files. Only immutable original
+  public fixtures bypass expiration.
 - Runtime bind defaults to loopback, port 7865. No paid resources or deployment required.
 
 ## Evidence

@@ -35,7 +35,8 @@ Use **Node to rename → New label → Rename node** for a quick edit. The advan
 graph editor supports adding/removing nodes or arrows through validated JSON.
 Select **Apply graph edits** to update the preview and downloads; they represent
 the last applied graph. Download Mermaid to edit the source in a Mermaid-compatible
-editor. Layouts can differ across renderers.
+editor. Layouts can differ across renderers. Edits carry the revision visible when
+clicked; a queued edit from an older revision is ignored to protect newer results.
 
 | Variable | Purpose |
 | --- | --- |
@@ -44,7 +45,7 @@ editor. Layouts can differ across renderers.
 | `HF_HOME` / `HF_HUB_CACHE` | Model cache location |
 | `HF_HUB_OFFLINE=1` | Use already-downloaded model files |
 | `D2G_THREADS` | CPU inference threads, 1–16; default 4 |
-| `D2G_CACHE_DIR` | Application-owned private Gradio cache |
+| `D2G_CACHE_DIR` | Parent for an owned private cache subdirectory |
 
 ## Recorded model outputs
 
@@ -81,7 +82,7 @@ PNG / JPEG → image validation → local Qwen3-VL → strict graph JSON
 - Strict bounded schema; duplicate JSON keys, dangling edges, unknown fields and
   duplicate directed labeled edges are rejected. Model output is never executed.
 - Deterministic local rendering handles disconnected nodes, decisions, cycles and
-  shortcuts. Text is escaped for each export format. No external renderer is called.
+  shortcuts and distinct parallel labeled arrows. Text is escaped for each export format. No external renderer is called.
 - Reports retain source hashes, model revision, prompt hash, raw output, settings,
   inference time, original model graph, current graph and parent edit revision.
 
@@ -101,7 +102,9 @@ PNG / JPEG → image validation → local Qwen3-VL → strict graph JSON
 - Files stay on the machine running the app. Hugging Face is contacted for model
   downloads. Original reports are capped at 24 and expire after one hour. The private
   Gradio cache is independently cleaned at startup and every minute, including after
-  a process restart. Immutable public examples bypass expiration.
+  a process restart. Cleanup is restricted to a marked `.diagram2graph-owned` child
+  of the configured cache parent; sibling files and parent permissions are preserved.
+  Immutable public examples bypass expiration.
 
 ## Development
 
