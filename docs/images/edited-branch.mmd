@@ -1,0 +1,11 @@
+flowchart TD
+    node_n1(["Incoming request"])
+    node_n2{"Approved?"}
+    node_n3["Publish"]
+    node_n4["Revise"]
+    node_n5(["Done"])
+    node_n1 --> node_n2
+    node_n2 -->|"Yes"| node_n3
+    node_n2 -->|"No"| node_n4
+    node_n3 --> node_n5
+    node_n4 --> node_n5

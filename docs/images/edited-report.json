@@ -1,0 +1,142 @@
+{
+  "schema_version": 1,
+  "origin": "user_edit",
+  "parent_report_id": "r-ff76313180e343eeb77eb68e7813173f",
+  "model": {
+    "id": "Qwen/Qwen3-VL-2B-Instruct",
+    "revision": "89644892e4d85e24eaac8bacfd4f463576704203"
+  },
+  "prompt_sha256": "7ff96550acfbf106a58ea9970c064b0f2f1a819c5e8de69043c9213ac7443946",
+  "settings": {
+    "device": "cpu",
+    "dtype": "float32",
+    "min_pixels": 65536,
+    "max_pixels": 262144,
+    "max_new_tokens": 768,
+    "image_processor": "fast",
+    "threads": 4
+  },
+  "input_file_sha256": "4c9d437fd1807044d9a7b566311a241dd14e448c80756a7b7a9df0ccb10ca8af",
+  "normalized_image_sha256": "4c9d437fd1807044d9a7b566311a241dd14e448c80756a7b7a9df0ccb10ca8af",
+  "input_size": [
+    840,
+    800
+  ],
+  "raw_prediction": "```json\n{\n  \"nodes\": [\n    {\n      \"id\": \"n1\",\n      \"label\": \"Request\",\n      \"kind\": \"terminator\"\n    },\n    {\n      \"id\": \"n2\",\n      \"label\": \"Approved?\",\n      \"kind\": \"decision\"\n    },\n    {\n      \"id\": \"n3\",\n      \"label\": \"Publish\",\n      \"kind\": \"process\"\n    },\n    {\n      \"id\": \"n4\",\n      \"label\": \"Revise\",\n      \"kind\": \"process\"\n    },\n    {\n      \"id\": \"n5\",\n      \"label\": \"Done\",\n      \"kind\": \"terminator\"\n    }\n  ],\n  \"edges\": [\n    {\n      \"source\": \"n1\",\n      \"target\": \"n2\",\n      \"label\": \"\"\n    },\n    {\n      \"source\": \"n2\",\n      \"target\": \"n3\",\n      \"label\": \"Yes\"\n    },\n    {\n      \"source\": \"n2\",\n      \"target\": \"n4\",\n      \"label\": \"No\"\n    },\n    {\n      \"source\": \"n3\",\n      \"target\": \"n5\",\n      \"label\": \"\"\n    },\n    {\n      \"source\": \"n4\",\n      \"target\": \"n5\",\n      \"label\": \"\"\n    }\n  ]\n}\n```",
+  "model_graph": {
+    "nodes": [
+      {
+        "id": "n1",
+        "label": "Request",
+        "kind": "terminator"
+      },
+      {
+        "id": "n2",
+        "label": "Approved?",
+        "kind": "decision"
+      },
+      {
+        "id": "n3",
+        "label": "Publish",
+        "kind": "process"
+      },
+      {
+        "id": "n4",
+        "label": "Revise",
+        "kind": "process"
+      },
+      {
+        "id": "n5",
+        "label": "Done",
+        "kind": "terminator"
+      }
+    ],
+    "edges": [
+      {
+        "source": "n1",
+        "target": "n2",
+        "label": ""
+      },
+      {
+        "source": "n2",
+        "target": "n3",
+        "label": "Yes"
+      },
+      {
+        "source": "n2",
+        "target": "n4",
+        "label": "No"
+      },
+      {
+        "source": "n3",
+        "target": "n5",
+        "label": ""
+      },
+      {
+        "source": "n4",
+        "target": "n5",
+        "label": ""
+      }
+    ]
+  },
+  "inference_seconds": 96.79,
+  "notice": "User-edited graph; the original model extraction remains in model_graph.",
+  "id": "r-89f25d49cabe430faeccfd71c270a655",
+  "graph": {
+    "nodes": [
+      {
+        "id": "n1",
+        "label": "Incoming request",
+        "kind": "terminator"
+      },
+      {
+        "id": "n2",
+        "label": "Approved?",
+        "kind": "decision"
+      },
+      {
+        "id": "n3",
+        "label": "Publish",
+        "kind": "process"
+      },
+      {
+        "id": "n4",
+        "label": "Revise",
+        "kind": "process"
+      },
+      {
+        "id": "n5",
+        "label": "Done",
+        "kind": "terminator"
+      }
+    ],
+    "edges": [
+      {
+        "source": "n1",
+        "target": "n2",
+        "label": ""
+      },
+      {
+        "source": "n2",
+        "target": "n3",
+        "label": "Yes"
+      },
+      {
+        "source": "n2",
+        "target": "n4",
+        "label": "No"
+      },
+      {
+        "source": "n3",
+        "target": "n5",
+        "label": ""
+      },
+      {
+        "source": "n4",
+        "target": "n5",
+        "label": ""
+      }
+    ]
+  },
+  "exported_at": "2026-11-20T13:48:56.121884+00:00"
+}

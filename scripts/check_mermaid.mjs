@@ -11,7 +11,7 @@ const {default: mermaid} = await import('mermaid');
 mermaid.initialize({startOnLoad: false, securityLevel: 'strict'});
 const files = process.argv.slice(2);
 if (!files.length) {
-  for (const directory of ['examples', 'evaluation/images']) {
+  for (const directory of ['examples', 'evaluation/images', 'tests/fixtures']) {
     if (fs.existsSync(directory)) {
       files.push(...fs.readdirSync(directory).filter(name => name.endsWith('.mmd')).map(name => path.join(directory, name)));
     }
