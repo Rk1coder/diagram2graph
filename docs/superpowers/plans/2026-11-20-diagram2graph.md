@@ -34,10 +34,10 @@ Files: `diagram2graph/graph.py`, `render.py`, `tests/test_graph.py`, `test_rende
 Interfaces: `parse_graph(text)->dict`, `validate_graph(dict)->dict`,
 `to_mermaid(graph)->str`, `render_svg(graph)->str`, `render_png(graph)->Image`.
 
-- [ ] Write failing validation/export/layout tests, observe RED.
-- [ ] Implement bounded schema, deterministic layout and escaped SVG/PNG/Mermaid.
-- [ ] Draw three independent fixtures; inspect labels and arrow directions.
-- [ ] Run complete suite/lint; commit a testable graph/export core.
+- [x] Write failing validation/export/layout tests, observe RED.
+- [x] Implement bounded schema, deterministic layout and escaped SVG/PNG/Mermaid.
+- [x] Draw three independent fixtures; inspect labels and arrow directions.
+- [x] Run complete suite/lint; commit a testable graph/export core.
 
 ### Task 2: Actual extraction, report service and editing
 
@@ -45,18 +45,18 @@ Files: `model.py`, `images.py`, `storage.py`, `service.py`, `scripts/evaluate.py
 Interfaces: `Engine.predict(image)->str`, `Service.extract(path)->dict`,
 `Service.edit(report,graph)->dict`, `score_graph(expected,actual)->dict`.
 
-- [ ] Write failing service/provenance/score/image/cache tests, observe RED.
-- [ ] Add pinned local adapter, versioned exports, strict editing and cache cleanup.
-- [ ] Run actual extraction on all fixed fixtures; retain successes and failures.
-- [ ] Run full suite/lint, document measurements, commit model/service evidence.
+- [x] Write failing service/provenance/score/image/cache tests, observe RED.
+- [x] Add pinned local adapter, versioned exports, strict editing and cache cleanup.
+- [x] Run actual extraction on all fixed fixtures; retain successes and failures.
+- [x] Run full suite/lint, document measurements, commit model/service evidence.
 
 ### Task 3: Workbench, real GIF, documentation and publication
 
 Files: `app.py`, tests, `scripts/make_demo.py`, README/docs, CI, actual output assets.
 
-- [ ] Write failing callback/invalidation tests; implement English UI and live edits.
-- [ ] Run full tests and actual browser extraction/edit/download-link checks.
-- [ ] Capture real states; assemble and verify labeled time-compressed looping GIF.
-- [ ] Fresh whole-branch review; fix important findings with RED->GREEN tests.
-- [ ] Commit stages; publish complete Git history and actual images/GIF after tests.
-- [ ] Verify remote source parity, README media, CI, source archive and Git bundle.
+- [x] Write failing callback/invalidation tests; implement English UI and live edits.
+- [x] Run full tests and actual browser extraction/edit/download-link checks.
+- [x] Capture real states; assemble and verify labeled time-compressed looping GIF.
+- [x] Fresh whole-branch review; fix important findings with RED->GREEN tests.
+- [x] Commit stages; publish complete Git history and actual images/GIF after tests.
+- [x] Verify remote source parity, README media, CI, source archive and Git bundle.

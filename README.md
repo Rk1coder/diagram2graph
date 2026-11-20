@@ -81,8 +81,8 @@ PNG / JPEG → image validation → local Qwen3-VL → strict graph JSON
   loading, CPU float32, greedy decoding, lazy model loading and serialized inference.
 - Strict bounded schema; duplicate JSON keys, dangling edges, unknown fields and
   duplicate directed labeled edges are rejected. Model output is never executed.
-- Deterministic local rendering handles disconnected nodes, decisions, cycles and
-  shortcuts and distinct parallel labeled arrows. Text is escaped for each export format. No external renderer is called.
+- Deterministic local rendering handles disconnected nodes, decisions, cycles, shortcuts
+  and distinct parallel labeled arrows. Text is escaped for each export format. No external renderer is called.
 - Reports retain source hashes, model revision, prompt hash, raw output, settings,
   inference time, original model graph, current graph and parent edit revision.
 
