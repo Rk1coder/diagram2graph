@@ -1,0 +1,12 @@
+{
+  "name": "diagram2graph-export-checks",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test:mermaid": "node scripts/check_mermaid.mjs"
+  },
+  "devDependencies": {
+    "jsdom": "26.1.0",
+    "mermaid": "12.3.0"
+  }
+}
